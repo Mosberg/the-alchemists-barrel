@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "all": "tab:item/kegs/iron_keg"
+  }
+}

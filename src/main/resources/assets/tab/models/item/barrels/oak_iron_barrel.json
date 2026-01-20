@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "all": "tab:item/barrels/oak_iron_barrel"
+  }
+}

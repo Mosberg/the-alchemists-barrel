@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "materials": [
+    {
+      "id": "barrels/oak_iron_barrel",
+      "type": "item",
+      "path": "assets/tab/textures/item/barrels/oak_iron_barrel.png"
+    },
+    {
+      "id": "barrels/oak_iron_barrel_block",
+      "type": "block",
+      "path": "assets/tab/textures/block/barrels/oak_iron_barrel_block.png"
+    },
+    {
+      "id": "flasks/fluid/large_flask_fluid_overlay",
+      "type": "item",
+      "path": "assets/tab/textures/item/flasks/fluid/large_flask_fluid_overlay.png"
+    },
+    {
+      "id": "flasks/fluid/medium_flask_fluid_overlay",
+      "type": "item",
+      "path": "assets/tab/textures/item/flasks/fluid/medium_flask_fluid_overlay.png"
+    },
+    {
+      "id": "flasks/fluid/small_flask_fluid_overlay",
+      "type": "item",
+      "path": "assets/tab/textures/item/flasks/fluid/small_flask_fluid_overlay.png"
+    },
+    {
+      "id": "flasks/large/large_oak_glass_flask",
+      "type": "item",
+      "path": "assets/tab/textures/item/flasks/large/large_oak_glass_flask.png"
+    },
+    {
+      "id": "flasks/medium/medium_oak_glass_flask",
+      "type": "item",
+      "path": "assets/tab/textures/item/flasks/medium/medium_oak_glass_flask.png"
+    },
+    {
+      "id": "flasks/small/small_oak_glass_flask",
+      "type": "item",
+      "path": "assets/tab/textures/item/flasks/small/small_oak_glass_flask.png"
+    },
+    {
+      "id": "kegs/iron_keg",
+      "type": "item",
+      "path": "assets/tab/textures/item/kegs/iron_keg.png"
+    },
+    {
+      "id": "kegs/iron_keg_block",
+      "type": "block",
+      "path": "assets/tab/textures/block/kegs/iron_keg_block.png"
+    }
+  ]
+}

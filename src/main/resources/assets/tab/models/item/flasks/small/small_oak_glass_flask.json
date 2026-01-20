@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "all": "tab:item/flasks/small/small_oak_glass_flask",
+    "overlay": "tab:item/flasks/fluid/small_flask_fluid_overlay"
+  }
+}
