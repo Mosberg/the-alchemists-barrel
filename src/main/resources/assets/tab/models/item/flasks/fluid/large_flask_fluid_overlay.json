@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "overlay": "tab:item/flasks/fluid/large_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/large_flask_fluid_overlay"
   }
 }

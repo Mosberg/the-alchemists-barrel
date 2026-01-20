@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -26,32 +25,29 @@ public final class MaterialRegistry {
     private MaterialRegistry() {}
 
     public static synchronized void load() {
-        if (loaded) {
+        if (loaded)
             return;
-        }
 
-        final InputStream resource = MaterialRegistry.class.getClassLoader()
+        InputStream in = MaterialRegistry.class.getClassLoader()
                 .getResourceAsStream("data/tab/schemas/materials.json");
 
-        if (resource == null) {
-            throw new IllegalStateException(
-                    "data/tab/schemas/materials.json not found on classpath");
+        if (in == null) {
+            throw new IllegalStateException("Missing resource: data/tab/schemas/materials.json");
         }
 
-        final JsonObject root =
-                JsonParser.parseReader(new InputStreamReader(resource, StandardCharsets.UTF_8))
-                        .getAsJsonObject();
+        JsonObject root = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8))
+                .getAsJsonObject();
 
-        final JsonArray arr = root.getAsJsonArray("materials");
+        JsonArray arr = root.getAsJsonArray("materials");
+
         MATERIALS.clear();
         BY_ID.clear();
 
-        final Gson gson = new Gson();
-        for (JsonElement el : arr) {
-            final MaterialDef def = gson.fromJson(el, MaterialDef.class);
-            if (def == null || def.id == null || def.id.isBlank()) {
+        Gson gson = new Gson();
+        for (int i = 0; i < arr.size(); i++) {
+            MaterialDef def = gson.fromJson(arr.get(i), MaterialDef.class);
+            if (def == null || def.id == null || def.id.isBlank() || def.type == null)
                 continue;
-            }
             MATERIALS.add(def);
             BY_ID.put(def.id, def);
         }

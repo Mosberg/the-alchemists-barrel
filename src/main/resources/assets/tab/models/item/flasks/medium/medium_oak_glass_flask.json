@@ -2,6 +2,6 @@
   "parent": "item/generated",
   "textures": {
     "all": "tab:item/flasks/medium/medium_oak_glass_flask",
-    "overlay": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
   }
 }

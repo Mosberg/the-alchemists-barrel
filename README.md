@@ -833,7 +833,7 @@ groovy generateMaterialsJson
   "parent": "item/generated",
   "textures": {
     "all": "tab:item/flasks/large/large_oak_glass_flask",
-    "overlay": "tab:item/flasks/fluid/large_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/large_flask_fluid_overlay"
   }
 }
 ```
@@ -845,7 +845,7 @@ groovy generateMaterialsJson
   "parent": "item/generated",
   "textures": {
     "all": "tab:item/flasks/medium/medium_oak_glass_flask",
-    "overlay": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
   }
 }
 ```
@@ -857,7 +857,7 @@ groovy generateMaterialsJson
   "parent": "item/generated",
   "textures": {
     "all": "tab:item/flasks/small/small_oak_glass_flask",
-    "overlay": "tab:item/flasks/fluid/small_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/small_flask_fluid_overlay"
   }
 }
 ```
@@ -868,7 +868,7 @@ groovy generateMaterialsJson
 {
   "parent": "item/generated",
   "textures": {
-    "overlay": "tab:item/flasks/fluid/large_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/large_flask_fluid_overlay"
   }
 }
 ```
@@ -879,7 +879,7 @@ groovy generateMaterialsJson
 {
   "parent": "item/generated",
   "textures": {
-    "overlay": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
   }
 }
 ```
@@ -890,7 +890,7 @@ groovy generateMaterialsJson
 {
   "parent": "item/generated",
   "textures": {
-    "overlay": "tab:item/flasks/fluid/small_flask_fluid_overlay"
+    "layer1": "tab:item/flasks/fluid/small_flask_fluid_overlay"
   }
 }
 ```
