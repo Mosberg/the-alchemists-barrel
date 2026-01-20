@@ -1,5 +1,6 @@
 package dk.mosberg.tab.content;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -13,29 +14,49 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-public class MaterialRegistry {
+public final class MaterialRegistry {
+
     public static final String MOD_ID = "tab";
+
     public static final List<MaterialDef> MATERIALS = new ArrayList<>();
     public static final Map<String, MaterialDef> BY_ID = new HashMap<>();
 
-    public static void load() {
-        var resource = MaterialRegistry.class.getClassLoader()
-                .getResourceAsStream("data/tab/schemas/materials.json");
-        if (resource == null) {
-            throw new IllegalStateException("materials.json not found");
+    private static boolean loaded;
+
+    private MaterialRegistry() {}
+
+    public static synchronized void load() {
+        if (loaded) {
+            return;
         }
-        JsonObject root =
+
+        final InputStream resource = MaterialRegistry.class.getClassLoader()
+                .getResourceAsStream("data/tab/schemas/materials.json");
+
+        if (resource == null) {
+            throw new IllegalStateException(
+                    "data/tab/schemas/materials.json not found on classpath");
+        }
+
+        final JsonObject root =
                 JsonParser.parseReader(new InputStreamReader(resource, StandardCharsets.UTF_8))
                         .getAsJsonObject();
-        JsonArray arr = root.getAsJsonArray("materials");
+
+        final JsonArray arr = root.getAsJsonArray("materials");
         MATERIALS.clear();
         BY_ID.clear();
+
+        final Gson gson = new Gson();
         for (JsonElement el : arr) {
-            @SuppressWarnings("null")
-            MaterialDef def = new Gson().fromJson(el, MaterialDef.class);
+            final MaterialDef def = gson.fromJson(el, MaterialDef.class);
+            if (def == null || def.id == null || def.id.isBlank()) {
+                continue;
+            }
             MATERIALS.add(def);
             BY_ID.put(def.id, def);
         }
-        MATERIALS.sort(Comparator.comparing(m -> m.id));
+
+        MATERIALS.sort(Comparator.comparing(d -> d.id));
+        loaded = true;
     }
 }
