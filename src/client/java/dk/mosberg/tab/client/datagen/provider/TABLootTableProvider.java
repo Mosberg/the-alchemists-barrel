@@ -15,10 +15,12 @@ import net.minecraft.loot.entry.ItemEntry;
 import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 
 public final class TABLootTableProvider extends SimpleFabricLootTableProvider {
-    public TABLootTableProvider(FabricDataOutput output, CompletableFuture<?> registriesFuture) {
+    public TABLootTableProvider(FabricDataOutput output,
+            CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
         super(output, registriesFuture, LootContextTypes.BLOCK);
     }
 

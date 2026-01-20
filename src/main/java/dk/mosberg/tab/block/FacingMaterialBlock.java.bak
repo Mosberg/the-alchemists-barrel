@@ -1,7 +1,5 @@
-
 package dk.mosberg.tab.block;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.item.ItemPlacementContext;
@@ -9,19 +7,13 @@ import net.minecraft.state.StateManager;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
+import com.mojang.serialization.Codec;
 
 public class FacingMaterialBlock extends HorizontalFacingBlock {
     public FacingMaterialBlock(Settings settings) {
         super(settings);
         this.setDefaultState(
                 this.getStateManager().getDefaultState().with(FACING, Direction.NORTH));
-    }
-
-    // Required by HorizontalFacingBlock in 1.21.11
-    @Override
-    public MapCodec<? extends HorizontalFacingBlock> getCodec() {
-        // This is a stub. Replace with the correct codec for your block if needed.
-        return (MapCodec<? extends HorizontalFacingBlock>) (Object) net.minecraft.block.HorizontalFacingBlock.CODEC;
     }
 
     @Override
@@ -43,5 +35,12 @@ public class FacingMaterialBlock extends HorizontalFacingBlock {
     @Override
     public BlockState mirror(BlockState state, BlockMirror mirror) {
         return state.rotate(mirror.getRotation(state.get(FACING)));
+    }
+
+    // Required by HorizontalFacingBlock in 1.21.11
+    @Override
+    public Codec<? extends HorizontalFacingBlock> getCodec() {
+        // This is a stub. Replace with the correct codec for your block if needed.
+        return net.minecraft.block.Block.CODEC;
     }
 }

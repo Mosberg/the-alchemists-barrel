@@ -65,4 +65,3 @@ Reference only; never edit directly.
 - Fabric Loom: `../../.sources/fabric-loom-dev-1.14/`
 - Yarn: `../../.sources/yarn-1.21.11/`
 - Minecraft assets: `../../.sources/minecraft-assets-1.21.11/`
-- Minecraft: `../../.sources/minecraft-1.21.11/`
