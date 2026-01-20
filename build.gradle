@@ -1,4 +1,3 @@
-
 plugins {
     id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
@@ -126,8 +125,6 @@ sourceSets {
 // ═════════════════════════════════════════════════════════════════════════════════
 
 processResources {
-    // mustRunAfter reference to generateMaterialsJson removed
-    // Capture properties as local variables (safe with config cache + closures)
     def modId = project.mod_id
     def modVersion = project.mod_version
     def modName = project.mod_name
@@ -141,7 +138,6 @@ processResources {
     def minecraftVer = project.minecraft_version
     def javaVer = project.java_version
 
-    // Inputs for build cache invalidation
     inputs.property "mod_id", modId
     inputs.property "mod_version", modVersion
     inputs.property "mod_name", modName

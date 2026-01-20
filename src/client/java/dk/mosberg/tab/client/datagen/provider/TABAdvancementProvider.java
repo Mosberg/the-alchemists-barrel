@@ -2,6 +2,7 @@ package dk.mosberg.tab.client.datagen.provider;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import dk.mosberg.tab.TheAlchemistsBarrel;
 import dk.mosberg.tab.content.MaterialDef;
 import dk.mosberg.tab.content.MaterialRegistry;
 import dk.mosberg.tab.registry.ModContent;
@@ -15,44 +16,48 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class TABAdvancementProvider extends FabricAdvancementProvider {
-
+public final class TABAdvancementProvider extends FabricAdvancementProvider {
     public TABAdvancementProvider(FabricDataOutput output,
             CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
         super(output, registriesFuture);
     }
 
-    @SuppressWarnings("removal")
     @Override
-    public void generateAdvancement(
-            @SuppressWarnings("null") RegistryWrapper.WrapperLookup registries,
-            @SuppressWarnings("null") Consumer<AdvancementEntry> consumer) {
+    public void generateAdvancement(RegistryWrapper.WrapperLookup registries,
+            Consumer<AdvancementEntry> consumer) {
         MaterialRegistry.load();
 
-        for (MaterialDef def : MaterialRegistry.MATERIALS) {
+        for (MaterialDef def : MaterialRegistry.all()) {
             if (def.advancement == null)
                 continue;
 
             var adv = def.advancement;
+            var icon = ModContent.getItem(def.id);
+            if (icon == null)
+                continue;
 
-            // Newer API style: build(consumer, idString)
-            String advId = MaterialRegistry.MOD_ID + ":materials/" + def.id;
+            String advId = TheAlchemistsBarrel.MOD_ID + ":materials/" + def.id.replace('/', '_');
 
             Advancement.Builder builder = Advancement.Builder.create()
-                    .display(ModContent.ITEMS.get(def.id), Text.literal(adv.title),
-                            Text.literal(adv.description), null, switch (adv.frame) {
+                    .display(icon, Text.literal(adv.title == null ? def.id : adv.title),
+                            Text.literal(adv.description == null ? "" : adv.description), null,
+                            switch (adv.frame) {
                                 case "goal" -> AdvancementFrame.GOAL;
                                 case "challenge" -> AdvancementFrame.CHALLENGE;
                                 default -> AdvancementFrame.TASK;
                             }, true, !adv.hidden, false)
-                    .criterion("has_item", InventoryChangedCriterion.Conditions
-                            .items(ModContent.ITEMS.get(def.id)));
+                    .criterion("has_item", InventoryChangedCriterion.Conditions.items(icon));
 
-            if (adv.parent != null) {
+            if (adv.parent != null && !adv.parent.isBlank()) {
                 builder.parent(Identifier.of(adv.parent));
             }
 
             builder.build(consumer, advId);
         }
+    }
+
+    @Override
+    public String getName() {
+        return "TABAdvancementProvider";
     }
 }

@@ -1,6 +1,5 @@
 package dk.mosberg.tab.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.item.ItemPlacementContext;
@@ -10,7 +9,6 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 
 public class FacingMaterialBlock extends HorizontalFacingBlock {
-
     public FacingMaterialBlock(Settings settings) {
         super(settings);
         this.setDefaultState(
@@ -18,7 +16,8 @@ public class FacingMaterialBlock extends HorizontalFacingBlock {
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void appendProperties(
+            StateManager.Builder<net.minecraft.block.Block, BlockState> builder) {
         builder.add(FACING);
     }
 

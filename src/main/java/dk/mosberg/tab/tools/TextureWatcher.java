@@ -11,35 +11,41 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
 public final class TextureWatcher {
+    private TextureWatcher() {}
 
     public static void main(String[] args) throws IOException, InterruptedException {
         Path itemDir = Paths.get("src/main/resources/assets/tab/textures/item");
         Path blockDir = Paths.get("src/main/resources/assets/tab/textures/block");
 
         try (WatchService watchService = FileSystems.getDefault().newWatchService()) {
-            if (Files.isDirectory(itemDir)) {
-                itemDir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
-                        StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-            }
-
-            if (Files.isDirectory(blockDir)) {
-                blockDir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
-                        StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
-            }
+            registerIfExists(watchService, itemDir);
+            registerIfExists(watchService, blockDir);
 
             System.out.println("Watching texture dirs. Ctrl+C to exit.");
 
             while (true) {
                 WatchKey key = watchService.take();
+
                 for (WatchEvent<?> event : key.pollEvents()) {
                     System.out
                             .println("Change detected: " + event.kind() + " -> " + event.context());
                     // Example hook:
                     // new ProcessBuilder("./gradlew", "runDatagen").inheritIO().start();
                 }
-                if (!key.reset())
+
+                if (!key.reset()) {
                     break;
+                }
             }
         }
+    }
+
+    private static void registerIfExists(WatchService watchService, Path dir) throws IOException {
+        if (!Files.isDirectory(dir)) {
+            return;
+        }
+
+        dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
     }
 }

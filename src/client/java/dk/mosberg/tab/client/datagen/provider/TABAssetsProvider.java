@@ -1,8 +1,11 @@
 package dk.mosberg.tab.client.datagen.provider;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import com.google.gson.JsonObject;
+import dk.mosberg.tab.TheAlchemistsBarrel;
 import dk.mosberg.tab.content.MaterialDef;
 import dk.mosberg.tab.content.MaterialRegistry;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
@@ -10,7 +13,6 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.DataWriter;
 
 public final class TABAssetsProvider implements DataProvider {
-
     private final FabricDataOutput output;
 
     public TABAssetsProvider(FabricDataOutput output) {
@@ -21,20 +23,23 @@ public final class TABAssetsProvider implements DataProvider {
     public CompletableFuture<?> run(DataWriter writer) {
         MaterialRegistry.load();
 
-        CompletableFuture<?> all = CompletableFuture.completedFuture(null);
+        List<CompletableFuture<?>> futures = new ArrayList<>();
 
-        for (MaterialDef def : MaterialRegistry.MATERIALS) {
+        for (MaterialDef def : MaterialRegistry.all()) {
             if ("item".equals(def.type)) {
-                all = all.thenCompose(v -> writeItemDefinition(writer, def, false))
-                        .thenCompose(v -> writeItemModel(writer, def));
+                futures.add(writeItemDefinition(writer, def, false));
+                futures.add(writeItemModel(writer, def));
             } else if ("block".equals(def.type)) {
-                all = all.thenCompose(v -> writeBlockState(writer, def))
-                        .thenCompose(v -> writeBlockModel(writer, def))
-                        .thenCompose(v -> writeItemDefinition(writer, def, true));
+                futures.add(writeBlockState(writer, def));
+                futures.add(writeBlockModel(writer, def));
+
+                if (def.has_item) {
+                    futures.add(writeItemDefinition(writer, def, true));
+                }
             }
         }
 
-        return all;
+        return CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new));
     }
 
     @Override
@@ -44,51 +49,44 @@ public final class TABAssetsProvider implements DataProvider {
 
     private CompletableFuture<?> writeItemDefinition(DataWriter writer, MaterialDef def,
             boolean isBlock) {
-        // assets/tab/items/<id>.json -> { "model": { "type": "minecraft:model", "model":
-        // "tab:item/..." } }
+        // assets/<modid>/items/<id>.json -> item model definition (1.21+ style)
         JsonObject root = new JsonObject();
         JsonObject model = new JsonObject();
+
         model.addProperty("type", "minecraft:model");
-        model.addProperty("model", (isBlock ? "tab:block/" : "tab:item/") + def.id);
+        model.addProperty("model", (isBlock ? TheAlchemistsBarrel.MOD_ID + ":block/"
+                : TheAlchemistsBarrel.MOD_ID + ":item/") + def.id);
+
         root.add("model", model);
 
-        Path path = output.getPath().resolve("assets").resolve(MaterialRegistry.MOD_ID)
+        Path path = output.getPath().resolve("assets").resolve(TheAlchemistsBarrel.MOD_ID)
                 .resolve("items").resolve(def.id + ".json");
 
         return DataProvider.writeToPath(writer, root, path);
     }
 
     private CompletableFuture<?> writeItemModel(DataWriter writer, MaterialDef def) {
-        // assets/tab/models/item/<id>.json
-        // - Always write layer0
-        // - If this is a flask (large/medium/small), also write layer1 overlay
+        // assets/<modid>/models/item/<id>.json
         JsonObject root = new JsonObject();
         root.addProperty("parent", "item/generated");
 
         JsonObject textures = new JsonObject();
+        textures.addProperty("layer0", TheAlchemistsBarrel.MOD_ID + ":item/" + def.id);
 
-        // Base texture is always layer0 (not "all")
-        textures.addProperty("layer0", "tab:item/" + def.id);
-
-        // Optional: flask fluid overlay as layer1
         String overlayId = flaskOverlayId(def.id);
         if (overlayId != null) {
-            textures.addProperty("layer1", "tab:item/" + overlayId);
+            textures.addProperty("layer1", TheAlchemistsBarrel.MOD_ID + ":item/" + overlayId);
         }
 
         root.add("textures", textures);
 
-        Path path = output.getPath().resolve("assets").resolve(MaterialRegistry.MOD_ID)
+        Path path = output.getPath().resolve("assets").resolve(TheAlchemistsBarrel.MOD_ID)
                 .resolve("models").resolve("item").resolve(def.id + ".json");
 
         return DataProvider.writeToPath(writer, root, path);
     }
 
     private static String flaskOverlayId(String itemId) {
-        // Expected ids from materials.json:
-        // flasks/large/large_oak_glass_flask -> flasks/fluid/large_flask_fluid_overlay
-        // flasks/medium/medium_oak_glass_flask -> flasks/fluid/medium_flask_fluid_overlay
-        // flasks/small/small_oak_glass_flask -> flasks/fluid/small_flask_fluid_overlay
         if (itemId == null)
             return null;
 
@@ -102,35 +100,33 @@ public final class TABAssetsProvider implements DataProvider {
         return null;
     }
 
-
     private CompletableFuture<?> writeBlockState(DataWriter writer, MaterialDef def) {
-        // assets/tab/blockstates/<id>.json -> facing variants (matches your existing blockstate
-        // files). [file:43][file:44]
+        // assets/<modid>/blockstates/<id>.json -> facing variants
         JsonObject root = new JsonObject();
         JsonObject variants = new JsonObject();
 
-        variants.add("normal", variant("tab:block/" + def.id, null));
-        variants.add("facing=north", variant("tab:block/" + def.id, null));
-        variants.add("facing=south", variant("tab:block/" + def.id, 180));
-        variants.add("facing=west", variant("tab:block/" + def.id, 270));
-        variants.add("facing=east", variant("tab:block/" + def.id, 90));
+        String model = TheAlchemistsBarrel.MOD_ID + ":block/" + def.id;
+
+        variants.add("facing=north", variant(model, null));
+        variants.add("facing=south", variant(model, 180));
+        variants.add("facing=west", variant(model, 270));
+        variants.add("facing=east", variant(model, 90));
 
         root.add("variants", variants);
 
-        Path path = output.getPath().resolve("assets").resolve(MaterialRegistry.MOD_ID)
+        Path path = output.getPath().resolve("assets").resolve(TheAlchemistsBarrel.MOD_ID)
                 .resolve("blockstates").resolve(def.id + ".json");
 
         return DataProvider.writeToPath(writer, root, path);
     }
 
     private CompletableFuture<?> writeBlockModel(DataWriter writer, MaterialDef def) {
-        // assets/tab/models/block/<id>.json -> parent template + texture map (matches your
-        // pattern). [file:53][file:55]
+        // assets/<modid>/models/block/<id>.json
         String parent;
         if (def.id.startsWith("barrels/"))
-            parent = "tab:block/barrels/barrel_block";
+            parent = TheAlchemistsBarrel.MOD_ID + ":block/barrels/barrel_block";
         else if (def.id.startsWith("kegs/"))
-            parent = "tab:block/kegs/keg_block";
+            parent = TheAlchemistsBarrel.MOD_ID + ":block/kegs/keg_block";
         else
             parent = "block/cube_all";
 
@@ -138,11 +134,11 @@ public final class TABAssetsProvider implements DataProvider {
         root.addProperty("parent", parent);
 
         JsonObject textures = new JsonObject();
-        textures.addProperty("all", "tab:block/" + def.id);
+        textures.addProperty("all", TheAlchemistsBarrel.MOD_ID + ":block/" + def.id);
         textures.addProperty("particle", "#all");
         root.add("textures", textures);
 
-        Path path = output.getPath().resolve("assets").resolve(MaterialRegistry.MOD_ID)
+        Path path = output.getPath().resolve("assets").resolve(TheAlchemistsBarrel.MOD_ID)
                 .resolve("models").resolve("block").resolve(def.id + ".json");
 
         return DataProvider.writeToPath(writer, root, path);
