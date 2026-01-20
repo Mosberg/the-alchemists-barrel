@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "#minecraft:oak_planks",
+    "S": "#minecraft:oak_slabs",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": ["PSP", "I I", "PSP"],
+  "result": {
+    "count": 1,
+    "id": "tab:oak_iron_barrel"
+  }
+}

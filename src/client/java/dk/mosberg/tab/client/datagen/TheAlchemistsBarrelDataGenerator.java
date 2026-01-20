@@ -4,7 +4,6 @@ import dk.mosberg.tab.client.datagen.provider.TABAdvancementProvider;
 import dk.mosberg.tab.client.datagen.provider.TABAssetsProvider;
 import dk.mosberg.tab.client.datagen.provider.TABLanguageProvider;
 import dk.mosberg.tab.client.datagen.provider.TABLootTableProvider;
-import dk.mosberg.tab.client.datagen.provider.TABRecipeProvider;
 import dk.mosberg.tab.client.datagen.provider.TABTagProvider;
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
@@ -21,7 +20,6 @@ public final class TheAlchemistsBarrelDataGenerator implements DataGeneratorEntr
 		pack.addProvider(TABAdvancementProvider::new);
 		pack.addProvider(TABLootTableProvider::new);
 		pack.addProvider(TABTagProvider::new);
-		pack.addProvider(TABRecipeProvider::new);
 
 		// Translations
 		pack.addProvider(TABLanguageProvider::new);

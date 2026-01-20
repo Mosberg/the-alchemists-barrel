@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": "minecraft:iron_blocks",
+    "I": "minecraft:iron_ingot"
+  },
+  "pattern": ["IPI", "I I", "IPI"],
+  "result": {
+    "count": 1,
+    "id": "tab:iron_keg"
+  }
+}

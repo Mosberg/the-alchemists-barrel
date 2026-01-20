@@ -8,106 +8,112 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.stream.Stream
+import groovy.transform.CompileStatic
 
+@CompileStatic
+class GenerateMaterialsJson {
 
-// --- Constants ---
-def MOD_ID = 'tab'
-def SCHEMA_VERSION = 1
-def PNG_EXT = '.png'
-def KEY_SCHEMA = 'schema'
-def KEY_MATERIALS = 'materials'
-def KEY_ID = 'id'
-def KEY_TYPE = 'type'
-def KEY_PATH = 'path'
+    // --- Constants ---
+    public static final String modId = 'tab'
+    public static final int schemaVersion = 1
+    public static final String pngExt = '.png'
+    public static final String keySchema = 'schema'
+    public static final String keyMaterials = 'materials'
+    public static final String keyId = 'id'
+    public static final String keyType = 'type'
+    public static final String keyPath = 'path'
 
-// --- Main logic ---
-def projectRoot = Paths.get('.').toAbsolutePath().normalize()
-def materialsPath = projectRoot.resolve("src/main/resources/data/${MOD_ID}/schemas/materials.json")
-def itemDir = projectRoot.resolve("src/main/resources/assets/${MOD_ID}/textures/item")
-def blockDir = projectRoot.resolve("src/main/resources/assets/${MOD_ID}/textures/block")
+    static void main(String[] args) {
+        Path projectRoot = Paths.get('.').toAbsolutePath().normalize()
+        Path materialsPath = projectRoot.resolve("src/main/resources/data/${modId}/schemas/materials.json")
+        Path itemDir = projectRoot.resolve("src/main/resources/assets/${modId}/textures/item")
+        Path blockDir = projectRoot.resolve("src/main/resources/assets/${modId}/textures/block")
 
-def byId = [:]
-byId.putAll(readExisting(materialsPath))
+        Map<String, Map<String, Object>> byId = new LinkedHashMap<>()
+        byId.putAll(readExisting(materialsPath))
 
-scanDir(itemDir, 'item').each { m ->
-    byId[m[KEY_ID]] = m
-}
-scanDir(blockDir, 'block').each { m ->
-    byId[m[KEY_ID]] = m
-}
+        scanDir(itemDir, 'item').each { Map<String, Object> m ->
+            byId[m[keyId] as String] = m
+        }
+        scanDir(blockDir, 'block').each { Map<String, Object> m ->
+            byId[m[keyId] as String] = m
+        }
 
-def materials = byId.values().toList()
-materials.sort { a, b -> a[KEY_ID] <=> b[KEY_ID] }
+        List<Map<String, Object>> materials = new ArrayList<>(byId.values())
+        materials.sort { a, b -> (a[keyId] as String) <=> (b[keyId] as String) }
 
-def result = [
-    (KEY_SCHEMA): SCHEMA_VERSION,
-    (KEY_MATERIALS): materials,
-]
+        Map<String, Object> result = [
+            (keySchema): schemaVersion,
+            (keyMaterials): materials,
+        ]
 
-Files.createDirectories(materialsPath.parent)
-def json = JsonOutput.prettyPrint(JsonOutput.toJson(result)) + System.lineSeparator()
-Files.writeString(materialsPath, json, StandardCharsets.UTF_8)
+        Files.createDirectories(materialsPath.parent)
+        String json = JsonOutput.prettyPrint(JsonOutput.toJson(result)) + System.lineSeparator()
+        Files.writeString(materialsPath, json, StandardCharsets.UTF_8)
 
-println("Generated ${materials.size()} materials into ${projectRoot.relativize(materialsPath)}")
+        println("Generated ${materials.size()} materials into ${projectRoot.relativize(materialsPath)}")
+    }
 
-// --- Functions ---
-def readExisting(materialsPath) {
-    def byId = [:]
-    if (!Files.exists(materialsPath)) {
+    static Map<String, Map<String, Object>> readExisting(Path materialsPath) {
+        Map<String, Map<String, Object>> byId = new LinkedHashMap<>()
+        if (!Files.exists(materialsPath)) {
+            return byId
+        }
+        try {
+            String text = Files.readString(materialsPath, StandardCharsets.UTF_8)
+            Object parsed = new JsonSlurper().parseText(text)
+            if (!(parsed instanceof Map)) {
+                return byId
+            }
+            Object matsObj = (parsed as Map)[keyMaterials]
+            if (!(matsObj instanceof List)) {
+                return byId
+            }
+            for (Object o : (List)matsObj) {
+                if (!(o instanceof Map)) {
+                    continue
+                }
+                Map m = (Map)o
+                Object idObj = m[keyId]
+                String id = idObj instanceof String ? (String)idObj : null
+                if (id == null || id.isBlank()) {
+                    continue
+                }
+                Map<String, Object> entry = new LinkedHashMap<>()
+                entry[keyId] = id
+                if (m[keyType] != null) {
+                    entry[keyType] = String.valueOf(m[keyType])
+                }
+                if (m[keyPath] != null) {
+                    entry[keyPath] = String.valueOf(m[keyPath])
+                }
+                byId[id] = entry
+            }
+        } catch (Exception ignored) {
+            // Treat unreadable/bad JSON as empty for convenience during dev.
+        }
         return byId
     }
-    try {
-        def text = Files.readString(materialsPath, StandardCharsets.UTF_8)
-        def parsed = new JsonSlurper().parseText(text)
-        if (!(parsed instanceof Map)) {
-            return byId
+
+    static List<Map<String, Object>> scanDir(Path dir, String type) {
+        if (!Files.isDirectory(dir)) {
+            return Collections.emptyList()
         }
-        def matsObj = parsed[KEY_MATERIALS]
-        if (!(matsObj instanceof List)) {
-            return byId
-        }
-        for (o in matsObj) {
-            if (!(o instanceof Map)) {
-                continue
+        List<Map<String, Object>> out = new ArrayList<>()
+        Files.walk(dir).filter { Path p -> Files.isRegularFile(p) }
+            .filter { Path p -> p.fileName.toString().endsWith(pngExt) }
+            .forEach { Path p ->
+                String rel = dir.relativize(p).toString().replace('\\', '/')
+                String id = rel.substring(0, rel.length() - pngExt.length())
+                String assetPath = "assets/${modId}/textures/${type}/${rel}"
+                out.add([
+                    (keyId): id,
+                    (keyType): type,
+                    (keyPath): assetPath,
+                ])
             }
-            def m = o
-            def id = m[KEY_ID]
-            if (id == null || (id instanceof String && id.isBlank())) {
-                continue
-            }
-            def entry = [:]
-            entry[KEY_ID] = id
-            if (m[KEY_TYPE] != null) {
-                entry[KEY_TYPE] = String.valueOf(m[KEY_TYPE])
-            }
-            if (m[KEY_PATH] != null) {
-                entry[KEY_PATH] = String.valueOf(m[KEY_PATH])
-            }
-            byId[id] = entry
-        }
-    } catch (ignored) {
-        // Treat unreadable/bad JSON as empty for convenience during dev.
+        return out
     }
-    return byId
 }
 
-def scanDir(dir, type) {
-    if (!Files.isDirectory(dir)) {
-        return []
-    }
-    def out = []
-    Files.walk(dir).filter { p -> Files.isRegularFile(p) }
-        .filter { p -> p.fileName.toString().endsWith(PNG_EXT) }
-        .forEach { p ->
-            def rel = dir.relativize(p).toString().replace('\\', '/')
-            def id = rel.substring(0, rel.length() - PNG_EXT.length())
-            def assetPath = "assets/${MOD_ID}/textures/${type}/${rel}"
-            out.add([
-                (KEY_ID): id,
-                (KEY_TYPE): type,
-                (KEY_PATH): assetPath,
-            ])
-        }
-    return out
-}
+GenerateMaterialsJson.main(args)
