@@ -59,12 +59,23 @@ public final class TABAssetsProvider implements DataProvider {
     }
 
     private CompletableFuture<?> writeItemModel(DataWriter writer, MaterialDef def) {
-        // assets/tab/models/item/<id>.json -> basic generated item using layer0
+        // assets/tab/models/item/<id>.json
+        // - Always write layer0
+        // - If this is a flask (large/medium/small), also write layer1 overlay
         JsonObject root = new JsonObject();
         root.addProperty("parent", "item/generated");
 
         JsonObject textures = new JsonObject();
+
+        // Base texture is always layer0 (not "all")
         textures.addProperty("layer0", "tab:item/" + def.id);
+
+        // Optional: flask fluid overlay as layer1
+        String overlayId = flaskOverlayId(def.id);
+        if (overlayId != null) {
+            textures.addProperty("layer1", "tab:item/" + overlayId);
+        }
+
         root.add("textures", textures);
 
         Path path = output.getPath().resolve("assets").resolve(MaterialRegistry.MOD_ID)
@@ -72,6 +83,25 @@ public final class TABAssetsProvider implements DataProvider {
 
         return DataProvider.writeToPath(writer, root, path);
     }
+
+    private static String flaskOverlayId(String itemId) {
+        // Expected ids from materials.json:
+        // flasks/large/large_oak_glass_flask -> flasks/fluid/large_flask_fluid_overlay
+        // flasks/medium/medium_oak_glass_flask -> flasks/fluid/medium_flask_fluid_overlay
+        // flasks/small/small_oak_glass_flask -> flasks/fluid/small_flask_fluid_overlay
+        if (itemId == null)
+            return null;
+
+        if (itemId.startsWith("flasks/large/"))
+            return "flasks/fluid/large_flask_fluid_overlay";
+        if (itemId.startsWith("flasks/medium/"))
+            return "flasks/fluid/medium_flask_fluid_overlay";
+        if (itemId.startsWith("flasks/small/"))
+            return "flasks/fluid/small_flask_fluid_overlay";
+
+        return null;
+    }
+
 
     private CompletableFuture<?> writeBlockState(DataWriter writer, MaterialDef def) {
         // assets/tab/blockstates/<id>.json -> facing variants (matches your existing blockstate

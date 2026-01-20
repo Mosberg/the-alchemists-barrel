@@ -28,6 +28,7 @@ the-alchemists-barrel
    │  │              ├─ datagen
    │  │              │  ├─ provider
    │  │              │  │  ├─ TABAdvancementProvider.java
+   │  │              │  │  ├─ TABAssetsProvider.java
    │  │              │  │  ├─ TABBlockStateProvider.java
    │  │              │  │  ├─ TABLanguageProvider.java
    │  │              │  │  ├─ TABLootTableProvider.java
@@ -52,6 +53,8 @@ the-alchemists-barrel
       │  └─ dk
       │     └─ mosberg
       │        └─ tab
+      │           ├─ block
+      │           │  └─ FacingMaterialBlock.java
       │           ├─ content
       │           │  ├─ MaterialDef.java
       │           │  └─ MaterialRegistry.java
@@ -832,7 +835,7 @@ groovy generateMaterialsJson
 {
   "parent": "item/generated",
   "textures": {
-    "all": "tab:item/flasks/large/large_oak_glass_flask",
+    "layer0": "tab:item/flasks/large/large_oak_glass_flask",
     "layer1": "tab:item/flasks/fluid/large_flask_fluid_overlay"
   }
 }
@@ -844,7 +847,7 @@ groovy generateMaterialsJson
 {
   "parent": "item/generated",
   "textures": {
-    "all": "tab:item/flasks/medium/medium_oak_glass_flask",
+    "layer0": "tab:item/flasks/medium/medium_oak_glass_flask",
     "layer1": "tab:item/flasks/fluid/medium_flask_fluid_overlay"
   }
 }
@@ -856,7 +859,7 @@ groovy generateMaterialsJson
 {
   "parent": "item/generated",
   "textures": {
-    "all": "tab:item/flasks/small/small_oak_glass_flask",
+    "layer0": "tab:item/flasks/small/small_oak_glass_flask",
     "layer1": "tab:item/flasks/fluid/small_flask_fluid_overlay"
   }
 }
